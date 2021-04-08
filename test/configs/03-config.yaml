@@ -1,0 +1,10 @@
+# labelNames
+metrics:
+  test_metric:
+    help: 'A test metric'
+    labelNames: ['label_name_test']
+
+devices:
+
+  test-device:
+    path: /tmp/mock-device-1

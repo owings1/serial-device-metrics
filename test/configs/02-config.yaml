@@ -1,0 +1,16 @@
+# Multi-device
+
+metrics:
+  test_metric:
+    help: 'A test metric'
+
+devices:
+
+  test-device-1:
+    path: /tmp/mock-device-1
+
+  test-device-2:
+    path: /tmp/mock-device-2
+    
+    
+  
