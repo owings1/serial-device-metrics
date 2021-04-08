@@ -1,0 +1,14 @@
+image: node:alpine
+
+stages:
+  - test
+
+test:
+  stage: test
+  tags:
+    - docker
+  variables:
+    FORCE_COLOR: "2"
+  script:
+    - npm install
+    - npm test
