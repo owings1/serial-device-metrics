@@ -1,0 +1,18 @@
+FROM node:alpine
+
+WORKDIR /var/lib/serial-device-metrics
+RUN ["chown", "node:node", "/var/lib/serial-device-metrics"]
+EXPOSE 8181
+
+ENV CONFIG_DIR="/etc/serial-device-metrics"
+
+COPY package.json .
+COPY package-lock.json .
+
+RUN npm install
+
+COPY --chown=node:node . .
+
+USER node
+
+CMD ["node", "index.js"]

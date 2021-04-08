@@ -1,0 +1,31 @@
+{
+  "name": "serial-device-metrics",
+  "version": "0.0.1",
+  "description": "read and publish prometheus metrics from serial devices",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "merge": "^2.1.1",
+    "node-fetch": "^2.6.1",
+    "prom-client": "^13.1.0",
+    "yaml": "^1.10.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "fs-extra": "^9.1.0",
+    "mocha": "^8.3.2",
+    "nyc": "^15.1.0",
+    "tmp": "^0.1.0"
+  },
+  "scripts": {
+    "test": "nyc --reporter=text-summary mocha test/test.js && nyc report --reporter=lcov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/owings1/serial-device-metrics"
+  },
+  "author": "Doug Owings <doug@dougowings.net>",
+  "license": "MIT"
+}

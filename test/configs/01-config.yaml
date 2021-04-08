@@ -1,0 +1,31 @@
+
+labels:
+  test_label: test-label-value
+
+metrics:
+  test_metric:
+    help: 'A test metric'
+    labels:
+      test_metric_label: test-metric-label-value
+
+devices:
+  test-device:
+
+    # required
+    path: /tmp/mock-device
+
+    # defaults
+    type: serial
+    baudRate: 9600
+    parser:
+      recordStart: 0x02
+      valueStart: 0x20
+      recordEnd: 0x0a
+
+    # optional
+    labels:
+      test_device_label: test-device-label-value
+    
+    
+    
+  
