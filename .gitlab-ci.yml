@@ -9,6 +9,8 @@ test:
     - docker
   variables:
     FORCE_COLOR: "2"
+  before_script:
+    - apk --no-cache add make g++ gcc python3 linux-headers udev
   script:
     - npm install
     - npm test
