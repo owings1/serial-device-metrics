@@ -41,6 +41,7 @@ SerPortMock.Binding = MockBinding
 
 const Defaults = {
     config: {
+        collectDefaultMetrics: false,
         metrics : {},
         labels  : {},
         devices : {}
@@ -81,8 +82,12 @@ class App {
     }
 
     async start() {
-        prom.collectDefaultMetrics({register: this.registry})
+
         await this.loadConfig()
+        if (this.config.collectDefaultMetrics) {
+            prom.collectDefaultMetrics({register: this.registry})
+        }
+
         for (var deviceName in this.devices) {
             await new Promise((resolve, reject) => {
                 const name = deviceName
@@ -180,18 +185,19 @@ class App {
         this.lastValues[deviceName][metricName] = {value, labels}
     }
 
-    getMetricValue(deviceName, metricName) {
+    getLastValue(deviceName, metricName) {
         return this.lastValues[deviceName][metricName]
     }
 
     buildLabels(deviceName, metricName, labels) {
+
         const registeredLabels = {}
-        
         for (var labelName of this.config.metrics[metricName].labelNames) {
             if (labelName in labels) {
                 registeredLabels[labelName] = labels[labelName]
             }
         }
+
         return merge(
             registeredLabels,
             {device: deviceName},

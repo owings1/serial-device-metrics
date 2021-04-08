@@ -1,0 +1,16 @@
+[
+    {
+        "delay": 10000,
+        "deviceName": "test-device",
+        "metricName": "test_metric",
+        "value": 30,
+        "labels": {"label_name_test": "test_value1"}
+    },
+    {
+        "delay": 10000,
+        "deviceName": "test-device",
+        "metricName": "test_metric",
+        "value": 60,
+        "labels": {"label_name_test": "test_value2"}
+    }
+]

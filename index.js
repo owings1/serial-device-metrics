@@ -26,10 +26,13 @@
 
 
 const App = require('./src/app')
+const fs  = require('fs')
 
-function main() {
+async function main(args) {
 
     const app = new App()
+
+    const inits = args[0] ? JSON.parse(fs.readFileSync(args[0], 'utf-8')) : []
 
     process.on('SIGINT', () => {
         app.log('SIGINT: Shutting down')
@@ -40,9 +43,17 @@ function main() {
         }
     })
 
-    app.start()
+    await app.start()
+
+    for (var init of inits) {
+        if (init.delay) {
+            await new Promise(resolve => setTimeout(resolve, init.delay))
+        }
+        app.log('Executing', init)
+        await app.setMetricValue(init.deviceName, init.metricName, init.value, init.labels)
+    }
 }
 
 if (require.main === module) {
-    main()
+    main(process.argv.slice(2))
 }

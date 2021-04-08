@@ -229,7 +229,7 @@ describe('App', () => {
                     })
                 })
                 await new Promise(resolve => setTimeout(resolve))
-                expect(app.getMetricValue('test-device', 'test_metric').value).to.equal(30)
+                expect(app.getLastValue('test-device', 'test_metric').value).to.equal(30)
             })
         })
     })
@@ -278,8 +278,8 @@ describe('App', () => {
                 })
             })
             await new Promise(resolve => setTimeout(resolve))
-            expect(app.getMetricValue('test-device-1', 'test_metric').value).to.equal(6)
-            expect(app.getMetricValue('test-device-2', 'test_metric').value).to.equal(8)
+            expect(app.getLastValue('test-device-1', 'test_metric').value).to.equal(6)
+            expect(app.getLastValue('test-device-2', 'test_metric').value).to.equal(8)
         })
     })
     
@@ -320,7 +320,7 @@ describe('App', () => {
         describe('#setMetricValue', () => {
             it('should remove unregistered label', () => {
                 app.setMetricValue('test-device', 'test_metric', 80, {label_name_test: 'value', unreg_label: 'value'})
-                expect(Object.keys(app.getMetricValue('test-device', 'test_metric').labels)).to.not.contain('unreg_label')
+                expect(Object.keys(app.getLastValue('test-device', 'test_metric').labels)).to.not.contain('unreg_label')
             })
         })
 
@@ -337,8 +337,8 @@ describe('App', () => {
                     })
                 })
                 await new Promise(resolve => setTimeout(resolve))
-                expect(app.getMetricValue('test-device', 'test_metric').value).to.equal(30)
-                expect(app.getMetricValue('test-device', 'test_metric').labels.label_name_test).to.equal('test-value')
+                expect(app.getLastValue('test-device', 'test_metric').value).to.equal(30)
+                expect(app.getLastValue('test-device', 'test_metric').labels.label_name_test).to.equal('test-value')
             })
         })
     })

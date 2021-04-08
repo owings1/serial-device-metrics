@@ -1,3 +1,4 @@
+collectDefaultMetrics: true
 
 labels:
   test_label: test-label-value
