@@ -10,6 +10,7 @@
     "merge": "^2.1.1",
     "node-fetch": "^2.6.1",
     "prom-client": "^13.1.0",
+    "serialport": "^9.0.7",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
