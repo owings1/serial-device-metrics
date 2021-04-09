@@ -387,7 +387,7 @@ describe('App', () => {
 
         it('should set timestamp metric when parent is set', () => {
             app.setMetricValue('test-device', 'temperature', 32)
-            expect(app.getLastValue('test-device', 'temperature_time_seconds').value).to.be.greaterThan(0)
+            expect(app.getLastValue('test-device', 'temperature_time_seconds').value).to.be.greaterThan(+new Date / 1000 - 1000)
         })
     })
 })

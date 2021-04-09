@@ -249,7 +249,7 @@ class App {
 
     async loadConfig() {
 
-        this.config = merge.recursive({}, Defaults.config, await App.readYamlFile(this.opts.configFile))
+        this.config = merge.recursive(true, Defaults.config, await App.readYamlFile(this.opts.configFile))
 
         this.devices = {}
         this.parsers = {}
@@ -257,7 +257,7 @@ class App {
         const deviceLabels = {}
         for (var deviceName in this.config.devices) {
             this.config.devices[deviceName] = merge.recursive(
-                {}, Defaults.device, this.config.devices[deviceName]
+                true, Defaults.device, this.config.devices[deviceName]
             )
             var device = this.config.devices[deviceName]
             if (!device.path) {
@@ -279,7 +279,7 @@ class App {
         this.metrics = {}
         for (var metricName in this.config.metrics) {
             this.config.metrics[metricName] = merge.recursive(
-                {}, Defaults.metric, this.config.metrics[metricName]
+                true, Defaults.metric, this.config.metrics[metricName]
             )
             var metric = this.config.metrics[metricName]
             var labels = merge({device: true}, this.config.labels, metric.labels, deviceLabels)
