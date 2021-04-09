@@ -44,7 +44,12 @@ const Defaults = {
         collectDefaultMetrics: false,
         metrics : {},
         labels  : {},
-        devices : {}
+        devices : {},
+        pushgateway: {
+            jobName      : 'push',
+            pushInterval : 60000,
+            request      : {}
+        }
     },
     metric: {
         labelNames: []
@@ -84,8 +89,19 @@ class App {
     async start() {
 
         await this.loadConfig()
+
         if (this.config.collectDefaultMetrics) {
             prom.collectDefaultMetrics({register: this.registry})
+        }
+
+        if (this.config.pushgateway.url) {
+            const pushgateway = this.config.pushgateway
+            this.gateway = new prom.Pushgateway(pushgateway.url, pushgateway.request, this.registry)
+            const pushIntervalMs = Math.max(100, +pushgateway.pushInterval || 0)
+            this.log('Pushing to', pushgateway.url, 'every', pushIntervalMs, 'ms')
+            this.pushInterval = setInterval(() => {
+                this.push().catch(err => this.error(err))
+            }, pushIntervalMs)
         }
 
         for (var deviceName in this.devices) {
@@ -120,11 +136,12 @@ class App {
     }
 
     async close() {
+        clearInterval(this.pushInterval)
         this.httpServer.close()
         for (var deviceName in this.devices) {
             this.devices[deviceName].close()
         }
-        this.registry.clear()        
+        this.registry.clear()
     }
 
     createServer(handler) {
@@ -185,6 +202,19 @@ class App {
         this.lastValues[deviceName][metricName] = {value, labels}
     }
 
+    push() {
+        return new Promise((resolve, reject) => {
+            const {jobName} = this.config.pushgateway
+            this.gateway.push({jobName}, (err, res, body) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(res, body)
+                }
+            })
+        })
+    }
+
     getLastValue(deviceName, metricName) {
         return this.lastValues[deviceName][metricName]
     }
@@ -209,7 +239,7 @@ class App {
 
     async loadConfig() {
 
-        this.config = merge({}, Defaults.config, await App.readYamlFile(this.opts.configFile))
+        this.config = merge.recursive({}, Defaults.config, await App.readYamlFile(this.opts.configFile))
 
         this.devices = {}
         this.parsers = {}

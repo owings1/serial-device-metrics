@@ -1,0 +1,16 @@
+# pushgateway
+pushgateway:
+  url: http://127.0.0.1:9091
+  pushInterval: 100
+  request:
+    headers:
+      x-authorization: BHSJZkTX22TALYjB
+
+metrics:
+  test_metric:
+    help: 'A test metric'
+    labelNames: ['label_name_test']
+
+devices:
+  test-device:
+    path: /tmp/mock-device-4

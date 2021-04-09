@@ -11,8 +11,6 @@ const YAML = require('yaml')
 
 const App = require('../src/app')
 
-const appUrl = 'http://localhost:' + (+process.env.HTTP_PORT || 8080)
-
 function newApp(configFile, opts, env) {
     configFile = resolve(__dirname, 'configs', configFile)
     opts = merge({}, {configFile, port: null, mock:true, quiet: true}, opts)
@@ -340,6 +338,45 @@ describe('App', () => {
                 expect(app.getLastValue('test-device', 'test_metric').value).to.equal(30)
                 expect(app.getLastValue('test-device', 'test_metric').labels.label_name_test).to.equal('test-value')
             })
+        })
+    })
+
+    describe('04-config.yaml', () => {
+
+        var app
+        var appUrl
+        var metricsUrl
+
+        var lastGateway
+
+        const mockGateway = http.createServer((req, res) => {
+            lastGateway = {req, res}
+            res.writeHead(200).end('200 OK')
+        })
+
+        beforeEach(async () => {
+            lastGateway = null
+            app = newApp('04-config.yaml')
+            mockGateway.listen(9091)
+            await app.start()
+            appUrl = 'http://localhost:' + app.httpServer.address().port
+            metricsUrl = appUrl + '/metrics'
+        })
+
+        afterEach(async () => {
+            mockGateway.close()
+            await app.close()
+        })
+
+        it('should run for 300ms and make request to gateway', async function () {
+            this.timeout(2000)
+            await new Promise(resolve => setTimeout(resolve, 300))
+            expect(!!lastGateway.req).to.equal(true)
+        })
+
+        it('should add header', async () => {
+            await app.push()
+            expect(lastGateway.req.headers['x-authorization']).to.equal('BHSJZkTX22TALYjB')
         })
     })
 })

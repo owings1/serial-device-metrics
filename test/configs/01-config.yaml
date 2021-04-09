@@ -13,7 +13,7 @@ devices:
   test-device:
 
     # required
-    path: /tmp/mock-device
+    path: /tmp/mock-device-1
 
     # defaults
     type: serial

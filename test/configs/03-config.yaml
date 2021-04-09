@@ -7,4 +7,4 @@ metrics:
 devices:
 
   test-device:
-    path: /tmp/mock-device-1
+    path: /tmp/mock-device-3
