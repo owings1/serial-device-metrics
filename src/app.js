@@ -50,7 +50,10 @@ const Defaults = {
         }
     },
     metric: {
-        labelNames: []
+        labelNames : [],
+        timestamp  : {
+            milliseconds: false
+        }
     },
     device: {
         type     : 'serial',
@@ -198,6 +201,15 @@ class App {
         labels = this.buildLabels(deviceName, metricName, labels)
         this.metrics[metricName].labels(labels).set(value)
         this.lastValues[deviceName][metricName] = {value, labels}
+        const ts = this.config.metrics[metricName].timestamp
+        if (ts.name) {
+            var tsValue = +new Date
+            if (!ts.milliseconds) {
+                tsValue = Math.floor(tsValue / 1000)
+            }
+            this.metrics[ts.name].labels(labels).set(tsValue)
+            this.lastValues[deviceName][ts.name] = {value: tsValue, labels}
+        }
     }
 
     push() {
@@ -266,7 +278,7 @@ class App {
 
         this.metrics = {}
         for (var metricName in this.config.metrics) {
-            this.config.metrics[metricName] = merge(
+            this.config.metrics[metricName] = merge.recursive(
                 {}, Defaults.metric, this.config.metrics[metricName]
             )
             var metric = this.config.metrics[metricName]
@@ -274,12 +286,24 @@ class App {
             for (var labelName of metric.labelNames) {
                 labels[labelName] = true
             }
+            var labelNames = Object.keys(labels)
             this.metrics[metricName] = new prom.Gauge({
                 name       : metricName,
                 help       : metric.help,
-                labelNames : Object.keys(labels),
-                registers  : [this.registry]
+                registers  : [this.registry],
+                labelNames
             })
+            if (metric.timestamp.name) {
+                if (this.metrics[metric.timestamp.name]) {
+                    throw new ConfigError('Duplicate name for timestamp metric ' + metric.timestamp.name)
+                }
+                this.metrics[metric.timestamp.name] = new prom.Gauge({
+                    name      : metric.timestamp.name,
+                    help      : metric.timestamp.help || (metric.help + ' last read timestamp'),
+                    registers : [this.registry],
+                    labelNames
+                })
+            }
         }
     }
 

@@ -235,14 +235,10 @@ describe('App', () => {
     describe('02-config.yaml', () => {
 
         var app
-        var appUrl
-        var metricsUrl
 
         beforeEach(async () => {
             app = newApp('02-config.yaml')
             await app.start()
-            appUrl = 'http://localhost:' + app.httpServer.address().port
-            metricsUrl = appUrl + '/metrics'
         })
 
         afterEach(async () => {
@@ -284,14 +280,10 @@ describe('App', () => {
     describe('03-config.yaml', () => {
 
         var app
-        var appUrl
-        var metricsUrl
 
         beforeEach(async () => {
             app = newApp('03-config.yaml')
             await app.start()
-            appUrl = 'http://localhost:' + app.httpServer.address().port
-            metricsUrl = appUrl + '/metrics'
         })
 
         afterEach(async () => {
@@ -344,8 +336,6 @@ describe('App', () => {
     describe('04-config.yaml', () => {
 
         var app
-        var appUrl
-        var metricsUrl
 
         var lastGateway
 
@@ -359,8 +349,6 @@ describe('App', () => {
             app = newApp('04-config.yaml')
             mockGateway.listen(9091)
             await app.start()
-            appUrl = 'http://localhost:' + app.httpServer.address().port
-            metricsUrl = appUrl + '/metrics'
         })
 
         afterEach(async () => {
@@ -377,6 +365,29 @@ describe('App', () => {
         it('should add header', async () => {
             await app.push()
             expect(lastGateway.req.headers['x-authorization']).to.equal('BHSJZkTX22TALYjB')
+        })
+    })
+
+    describe('05-config.yaml', () => {
+
+        var app
+
+        beforeEach(async () => {
+            app = newApp('05-config.yaml')
+            await app.start()
+        })
+
+        afterEach(async () => {
+            await app.close()
+        })
+
+        it('should create timestamp metric', () => {
+            expect(!!app.metrics.temperature_time_seconds).to.equal(true)
+        })
+
+        it('should set timestamp metric when parent is set', () => {
+            app.setMetricValue('test-device', 'temperature', 32)
+            expect(app.getLastValue('test-device', 'temperature_time_seconds').value).to.be.greaterThan(0)
         })
     })
 })

@@ -1,0 +1,11 @@
+
+metrics:
+  temperature:
+    help: 'the temperature'
+    timestamp:
+      name: 'temperature_time_seconds'
+      milliseconds: false
+
+devices:
+  test-device:
+    path: /tmp/test-device-5
