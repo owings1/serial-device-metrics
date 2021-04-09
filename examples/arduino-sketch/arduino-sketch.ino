@@ -2,13 +2,24 @@
 
 */
 
+#define BAUD_RATE 9600
+#define VMON_PIN A2
+
+float vmain = 0;
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(BAUD_RATE);
+  pinMode(VMON_PIN, INPUT);
 }
 
 void loop() {
   delay(1000);
-  sendMetric("test_metric{test_label='test_value'}", random(1000));
+  readVoltage();
+  sendMetric("voltage{circuit='main'}", vmain);
+}
+
+void readVoltage() {
+  vmain = (analogRead(VMON_PIN) * (5.0 / 1024.0)) / 0.193;
 }
 
 void sendMetric(char metricStr[], float value) {
