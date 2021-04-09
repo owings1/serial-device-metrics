@@ -6,7 +6,7 @@ WORKDIR /var/lib/serial-device-metrics
 RUN ["chown", "node:node", "/var/lib/serial-device-metrics"]
 EXPOSE 8080
 
-ENV CONFIG_DIR="/etc/serial-device-metrics"
+ENV CONFIG_FILE="/etc/serial-device-metrics/config.yaml"
 
 RUN apk add --no-cache make g++ gcc python3 linux-headers udev
 
