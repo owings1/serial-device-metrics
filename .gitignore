@@ -5,3 +5,4 @@ node_modules
 /dist
 /local
 /config.*
+/qemu-arm-static

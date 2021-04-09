@@ -1,5 +1,7 @@
 FROM node:alpine
 
+COPY qemu-arm-static /usr/bin
+
 WORKDIR /var/lib/serial-device-metrics
 RUN ["chown", "node:node", "/var/lib/serial-device-metrics"]
 EXPOSE 8181
