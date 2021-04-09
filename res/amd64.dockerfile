@@ -1,7 +1,8 @@
 FROM node:alpine
 
 WORKDIR /var/lib/serial-device-metrics
-RUN ["chown", "node:node", "/var/lib/serial-device-metrics"]
+RUN chown node:node /var/lib/serial-device-metrics && \
+    addgroup node dialout
 EXPOSE 8080
 
 ENV CONFIG_FILE="/etc/serial-device-metrics/config.yaml"
