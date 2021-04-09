@@ -1,6 +1,4 @@
-FROM arm32v7/node:alpine
-
-COPY qemu-arm-static /usr/bin
+FROM node:alpine
 
 WORKDIR /var/lib/serial-device-metrics
 RUN ["chown", "node:node", "/var/lib/serial-device-metrics"]
