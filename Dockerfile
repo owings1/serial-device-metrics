@@ -8,8 +8,12 @@ FROM arm32v7/node:alpine
 
 COPY --from=builder qemu-arm-static /usr/bin
 
+RUN apk add --no-cache bash
+
 WORKDIR /var/lib/serial-device-metrics
-RUN ["/bin/sh", "-c", "chown node:node /var/lib/serial-device-metrics"]
+COPY --chown=node:node scripts scripts
+RUN scripts/chown.sh
+#RUN ["/bin/sh", "-c", "chown node:node /var/lib/serial-device-metrics"]
 EXPOSE 8080
 
 ENV CONFIG_FILE="/etc/serial-device-metrics/config.yaml"
