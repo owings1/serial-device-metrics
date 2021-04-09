@@ -1,12 +1,12 @@
-FROM alpine AS builder
-
+#FROM alpine AS builder
+FROM arm32v7/node:alpine
 # Download QEMU, see https://github.com/docker/hub-feedback/issues/1261
 ENV QEMU_URL https://github.com/balena-io/qemu/releases/download/v3.0.0%2Bresin/qemu-3.0.0+resin-arm.tar.gz
-RUN apk add curl && curl -q -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
+RUN cd /usr/bin && apk add curl && curl -q -L ${QEMU_URL} | tar zxvf - -C . --strip-components 1
 
-FROM arm32v7/node:alpine
+#FROM arm32v7/node:alpine
 
-COPY --from=builder qemu-arm-static /usr/bin/qemu-arm-static
+#COPY --from=builder qemu-arm-static /usr/bin/qemu-arm-static
 
 RUN apk add --no-cache bash
 
