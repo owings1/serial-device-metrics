@@ -6,7 +6,7 @@ RUN apk add curl && curl -q -L ${QEMU_URL} | tar zxvf - -C . --strip-components 
 
 FROM arm32v7/node:alpine
 
-COPY --from=builder qemu-arm-static /usr/bin/
+COPY --from=builder qemu-arm-static /usr/bin/qemu-arm-static
 
 RUN apk add --no-cache bash
 
