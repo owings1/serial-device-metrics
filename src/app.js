@@ -37,8 +37,6 @@ const MockBinding = require('@serialport/binding-mock')
 const SerPortFull = require('serialport')
 const SerPortMock = require('@serialport/stream')
 
-SerPortMock.Binding = MockBinding
-
 const Defaults = {
     config: {
         collectDefaultMetrics: false,
@@ -288,6 +286,7 @@ class App {
     createDevice(device) {
         var SerialPort = SerPortFull
         if (this.opts.mock) {
+            SerPortMock.Binding = MockBinding
             var SerialPort = SerPortMock
             MockBinding.createPort(device.path, {echo: true, readyData: []})
         }
