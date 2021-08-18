@@ -1,0 +1,6 @@
+devices:
+  sensor-monitor:
+    path: /dev/cu.usbserial-1460
+
+
+
