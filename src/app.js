@@ -23,9 +23,13 @@
  *
  * @author Doug Owings <doug@dougowings.net>
  */
+const {
+    Logger,
+    merging: {merge},
+    objects: {update},
+} = require('utils-h')
 const fs    = require('fs').promises
 const http  = require('http')
-const merge = require('merge')
 const path  = require('path')
 const prom  = require('prom-client')
 const YAML  = require('yaml')
@@ -46,14 +50,14 @@ const Defaults = {
         pushgateway: {
             jobName      : 'push',
             pushInterval : 60000,
-            request      : {}
-        }
+            request      : {},
+        },
     },
     metric: {
         labelNames : [],
         timestamp  : {
-            milliseconds: false
-        }
+            milliseconds: false,
+        },
     },
     device: {
         type     : 'serial',
@@ -62,11 +66,17 @@ const Defaults = {
         parser   : {
             recordStart : 0x02,
             valueStart  : 0x20,
-            recordEnd   : 0x0a
-        }
-    }
+            recordEnd   : 0x0a,
+        },
+    },
 }
-
+function loggerPrefix(level) {
+    return [
+        new Date().toISOString(),
+        `[${this.name}]`,
+        `[${this.chalks[level].prefix(level.toUpperCase())}]`,
+    ]
+}
 class App {
 
     static defaults(env) {
@@ -74,17 +84,28 @@ class App {
         const configFile = resolve(env.CONFIG_FILE || 'config.yaml')
         return {
             configFile,
-            port  : +env.HTTP_PORT || 8080,
-            quiet : !!env.QUIET,
-            mock  : !!env.MOCK
+            port : +env.HTTP_PORT || 8080,
+            mock : !!env.MOCK,
         }
     }
 
     constructor(opts, env) {
         env = env || process.env
-        this.opts = merge({}, App.defaults(env), opts)
+        this.opts = merge(App.defaults(env), opts)
+        this.logger = new Logger({
+            name: this.constructor.name,
+            prefix: loggerPrefix,
+        })
         this.httpServer = this.createServer((req, res) => this.serve(req, res))
         this.registry = new prom.Registry
+    }
+
+    get logLevel() {
+        return this.logger.logLevel
+    }
+
+    set logLevel(n) {
+        this.logger.logLevel = n
     }
 
     async start() {
@@ -99,18 +120,18 @@ class App {
             const pushgateway = this.config.pushgateway
             this.gateway = new prom.Pushgateway(pushgateway.url, pushgateway.request, this.registry)
             const pushIntervalMs = Math.max(100, +pushgateway.pushInterval || 0)
-            this.log('Pushing to', pushgateway.url, 'every', pushIntervalMs, 'ms')
+            this.logger.info('Pushing to', pushgateway.url, 'every', pushIntervalMs, 'ms')
             this.pushInterval = setInterval(() => {
-                this.push().catch(err => this.error(err))
+                this.push().catch(err => this.logger.error(err))
             }, pushIntervalMs)
         }
 
-        for (var deviceName in this.devices) {
+        for (const deviceName in this.devices) {
             await new Promise((resolve, reject) => {
                 const name = deviceName
                 const device = this.devices[name]
                 const parser = this.parsers[name]
-                this.log('Opening device', name)
+                this.logger.info('Opening device', name)
                 device.open(err => {
                     if (err) {
                         reject(err)
@@ -124,7 +145,7 @@ class App {
                                 this.setMetricValue(name, res.metricName, res.value, res.labels)
                             }
                         } catch (err) {
-                            this.error(err)
+                            this.logger.error(err)
                         }
                     })
                     resolve()
@@ -133,13 +154,13 @@ class App {
         }
 
         this.httpServer.listen(this.opts.port)
-        this.log('Listening on', this.httpServer.address())
+        this.logger.info('Listening on', this.httpServer.address())
     }
 
     async close() {
         clearInterval(this.pushInterval)
         this.httpServer.close()
-        for (var deviceName in this.devices) {
+        for (const deviceName in this.devices) {
             this.devices[deviceName].close()
         }
         this.registry.clear()
@@ -151,13 +172,13 @@ class App {
                 handler(req, res)
             } catch (err) {
                 res.writeHead(500).end('500 Internal Error')
-                this.error(err)
+                this.logger.error(err)
             }
         })
     }
 
     serve(req, res) {
-        if (req.url == '/ready') {
+        if (req.url === '/ready') {
             res.writeHead(200).end('OK Ready')
             return
         }
@@ -183,7 +204,7 @@ class App {
         const {metricName, labels} = App.parseLabels(metricStr)
 
         if (!this.metrics[metricName]) {
-            this.log('Skipping unregistered metric', metricName)
+            this.logger.warn('Skipping unregistered metric', metricName)
             return
         }
 
@@ -203,7 +224,7 @@ class App {
         this.lastValues[deviceName][metricName] = {value, labels}
         const ts = this.config.metrics[metricName].timestamp
         if (ts.name) {
-            var tsValue = +new Date
+            let tsValue = +new Date
             if (!ts.milliseconds) {
                 tsValue = Math.floor(tsValue / 1000)
             }
@@ -232,7 +253,7 @@ class App {
     buildLabels(deviceName, metricName, labels) {
 
         const registeredLabels = {}
-        for (var labelName of this.config.metrics[metricName].labelNames) {
+        for (const labelName of this.config.metrics[metricName].labelNames) {
             if (labelName in labels) {
                 registeredLabels[labelName] = labels[labelName]
             }
@@ -248,23 +269,22 @@ class App {
     }
 
     async loadConfig() {
-
-        this.config = merge.recursive(true, Defaults.config, await App.readYamlFile(this.opts.configFile))
-
+        const loaded = await App.readYamlFile(this.opts.configFile)
+        this.config = merge(Defaults.config, loaded)
         this.devices = {}
         this.parsers = {}
         this.lastValues = {}
         const deviceLabels = {}
-        for (var deviceName in this.config.devices) {
-            this.config.devices[deviceName] = merge.recursive(
-                true, Defaults.device, this.config.devices[deviceName]
+        for (const deviceName in this.config.devices) {
+            this.config.devices[deviceName] = merge(
+                Defaults.device, this.config.devices[deviceName]
             )
-            var device = this.config.devices[deviceName]
+            const device = this.config.devices[deviceName]
             if (!device.path) {
                 throw new ConfigError('Missing device path for ' + deviceName)
             }
-            merge(deviceLabels, device.labels)
-            for (var key of ['recordStart', 'valueStart', 'recordEnd']) {
+            update(deviceLabels, device.labels)
+            for (const key of ['recordStart', 'valueStart', 'recordEnd']) {
                 device.parser[key] = parseInt(device.parser[key])
                 if (isNaN(device.parser[key])) {
                     throw new ConfigError('Invalid integer value for ' + key)
@@ -273,20 +293,19 @@ class App {
             this.devices[deviceName] = this.createDevice(device)
             this.parsers[deviceName] = new Delimiter({delimiter: [device.parser.recordEnd]})
             this.lastValues[deviceName] = {}
-            this.log('Created device', deviceName, 'at', device.path)
+            this.logger.info('Created device', deviceName, 'at', device.path)
         }
-
         this.metrics = {}
-        for (var metricName in this.config.metrics) {
-            this.config.metrics[metricName] = merge.recursive(
-                true, Defaults.metric, this.config.metrics[metricName]
+        for (const metricName in this.config.metrics) {
+            this.config.metrics[metricName] = merge(
+                Defaults.metric, this.config.metrics[metricName]
             )
-            var metric = this.config.metrics[metricName]
-            var labels = merge({device: true}, this.config.labels, metric.labels, deviceLabels)
-            for (var labelName of metric.labelNames) {
+            const metric = this.config.metrics[metricName]
+            const labels = merge({device: true}, this.config.labels, metric.labels, deviceLabels)
+            for (const labelName of metric.labelNames) {
                 labels[labelName] = true
             }
-            var labelNames = Object.keys(labels)
+            const labelNames = Object.keys(labels)
             this.metrics[metricName] = new prom.Gauge({
                 name       : metricName,
                 help       : metric.help,
@@ -301,30 +320,20 @@ class App {
                     name      : metric.timestamp.name,
                     help      : metric.timestamp.help || (metric.help + ' last read timestamp'),
                     registers : [this.registry],
-                    labelNames
+                    labelNames,
                 })
             }
         }
     }
 
     createDevice(device) {
-        var SerialPort = SerPortFull
+        let SerialPort = SerPortFull
         if (this.opts.mock) {
             SerPortMock.Binding = MockBinding
-            var SerialPort = SerPortMock
+            SerialPort = SerPortMock
             MockBinding.createPort(device.path, {echo: true, readyData: []})
         }
         return new SerialPort(device.path, {baudRate: device.baudRate, autoOpen: false})
-    }
-
-    log(...args) {
-        if (!this.opts.quiet) {
-            console.log(new Date, ...args)
-        }
-    }
-
-    error(...args) {
-        console.error(new Date, ...args)
     }
 
     static async readYamlFile(file) {
@@ -354,34 +363,34 @@ class App {
         res.metricName = input.substring(0, openIdx).trim()
         res.labelsStr = input.substring(openIdx + 1, input.length - 1)
 
-        var str = res.labelsStr
+        let str = res.labelsStr
 
         while (str.length) {
 
-            var eqIdx = str.indexOf('=')
+            const eqIdx = str.indexOf('=')
 
             if (eqIdx < 1) {
                 throw new ParseError('Missing or unexpected = in label expression')
             }
 
-            var labelName = str.substring(0, eqIdx).trim()
+            const labelName = str.substring(0, eqIdx).trim()
             str = str.substring(eqIdx + 1).trim()
 
             var quoteChar = str[0]
-            if (quoteChar != '"' && quoteChar != "'") {
+            if (quoteChar !== '"' && quoteChar !== "'") {
                 throw new ParseError('Missing open quote for label value')
             }
             str = str.substring(1)
 
-            var value = ''
-            var valueEndIdx = 0
-            while (str[valueEndIdx] != quoteChar) {
+            let value = ''
+            let valueEndIdx = 0
+            while (str[valueEndIdx] !== quoteChar) {
 
                 if (valueEndIdx > str.length - 1) {
                     throw new ParseError('Missing close quote for label value')
                 }
 
-                if (str[valueEndIdx] == '\\') {
+                if (str[valueEndIdx] === '\\') {
                     valueEndIdx += 1
                 }
 
@@ -392,7 +401,7 @@ class App {
             res.labels[labelName] = value
             str = str.substring(valueEndIdx + 1).trim()
 
-            if (str[0] == ',') {
+            if (str[0] === ',') {
                 str = str.substring(1).trim()
             }
         }
