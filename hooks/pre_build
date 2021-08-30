@@ -1,5 +1,0 @@
-#!/bin/bash
-if [[ "$DOCKERFILE_PATH" == *arm32.dockerfile ]]; then
-    echo "Running multiarch/qemu-user-static:register"
-    docker run --rm --privileged multiarch/qemu-user-static:register --reset
-fi

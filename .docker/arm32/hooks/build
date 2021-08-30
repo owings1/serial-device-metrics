@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "Building for arm32"
+
+echo "Downloading qemu"
+curl -sSL `cat "$(dirname $0)/../qemu.url"` | tar xzvf - --strip-components=1
+
+echo "Running multiarch/qemu-user-static:register"
+docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+echo "Executing docker build"
+docker build \
+    -f "$DOCKERFILE_PATH" \
+    -t "$IMAGE_NAME" \
+    --build-arg "NPM_TOKEN=$NPM_TOKEN" \
+    .

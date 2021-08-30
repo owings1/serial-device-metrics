@@ -1,0 +1,9 @@
+#!/bin/bash
+echo "Building for amd64"
+
+echo "Executing docker build"
+docker build \
+    -f "$DOCKERFILE_PATH" \
+    -t "$IMAGE_NAME" \
+    --build-arg "NPM_TOKEN=$NPM_TOKEN" \
+    .

@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [[ "$DOCKERFILE_PATH" == *arm32.dockerfile ]]; then
-    echo "Downloading qemu for arm32"
-    curl -sSL `cat res/qemu.url` | tar xzvf - --strip-components=1
-else
-    echo "Skipping qemu download for $DOCKERFILE_PATH"
-fi
