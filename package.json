@@ -1,16 +1,43 @@
 {
-  "name": "serial-device-metrics",
+  "name": "owings1/serial-device-metrics",
+  "private": true,
   "version": "0.0.1",
   "description": "read and publish prometheus metrics from serial devices",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
+  "scripts": {
+    "test": "nyc --reporter=text-summary mocha test/specs/** && nyc report --reporter=lcov"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/owings1/serial-device-metrics.git"
+  },
+  "keywords": [
+    "arduino",
+    "prometheus",
+    "serial port"
+  ],
+  "author": "Doug Owings <doug@dougowings.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/owings1/serial-device-metrics/issues"
+  },
+  "files": [
+    "src",
+    "index.js",
+    "LICENSE",
+    "NOTICE.md",
+    "README.md"
+  ],
+  "homepage": "https://github.com/owings1/serial-device-metrics#readme",
   "dependencies": {
+    "@quale/core": "^0.1.1",
+    "@quale/term": "^0.1.1",
     "node-fetch": "^2.6.1",
     "prom-client": "^13.1.0",
     "serialport": "^9.0.7",
-    "utils-h": "https://github.com/owings1/node-utils-h.git",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
@@ -20,13 +47,12 @@
     "nyc": "^15.1.0",
     "tmp": "^0.1.0"
   },
-  "scripts": {
-    "test": "nyc --reporter=text-summary mocha test/test.js && nyc report --reporter=lcov"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://bitbucket.org/owings1/serial-device-metrics"
-  },
-  "author": "Doug Owings <doug@dougowings.net>",
-  "license": "MIT"
+  "mocha": {
+    "extension": [
+      "test.js"
+    ],
+    "file": [
+      "test/helpers/setup.js"
+    ]
+  }
 }

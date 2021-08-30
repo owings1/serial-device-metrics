@@ -14,7 +14,7 @@ RUN apk add --no-cache make g++ gcc python3 linux-headers udev
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install
+RUN npm install --omit dev
 
 COPY --chown=node:node . .
 

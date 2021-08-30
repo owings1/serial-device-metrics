@@ -1,5 +1,5 @@
 const {expect} = require('chai')
-const {merging: {merge}} = require('utils-h')
+const {merging: {merge}} = require('@quale/term')
 const fetch = require('node-fetch')
 const fs = require('fs')
 const fse = require('fs-extra')
@@ -9,10 +9,10 @@ const {resolve} = path
 const tmp = require('tmp')
 const YAML = require('yaml')
 
-const App = require('../src/app')
+const App = require('../../src/app.js')
 
 function newApp(configFile, opts, env) {
-    configFile = resolve(__dirname, 'configs', configFile)
+    configFile = resolve(__dirname, '../fixtures/configs', configFile)
     opts = merge({configFile, port: null, mock:true}, opts)
     const app = new App(opts, env)
     app.logLevel = 1

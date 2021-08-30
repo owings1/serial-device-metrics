@@ -20,14 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @author Doug Owings <doug@dougowings.net>
  */
-const {
-    Logger,
-    merging: {merge},
-    objects: {update},
-} = require('utils-h')
+const {objects: {update}} = require('@quale/core')
+const {Logger, merging: {merge}} = require('@quale/term')
 const fs    = require('fs').promises
 const http  = require('http')
 const path  = require('path')
@@ -70,6 +65,7 @@ const Defaults = {
         },
     },
 }
+
 function loggerPrefix(level) {
     return [
         new Date().toISOString(),
@@ -77,6 +73,7 @@ function loggerPrefix(level) {
         `[${this.chalks[level].prefix(level.toUpperCase())}]`,
     ]
 }
+
 class App {
 
     static defaults(env) {

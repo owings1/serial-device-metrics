@@ -20,22 +20,18 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * @author Doug Owings <doug@dougowings.net>
  */
-
-
-const App = require('./src/app')
 const fs  = require('fs')
+const App = require('./src/app.js')
 
 async function main(args) {
 
-    const app = new App()
+    const app = {logger} = new App()
 
     const inits = args[0] ? JSON.parse(fs.readFileSync(args[0], 'utf-8')) : []
 
     process.on('SIGINT', () => {
-        app.log('SIGINT: Shutting down')
+        logger.log('SIGINT: Shutting down')
         try {
             app.close()
         } catch (e) {
@@ -45,11 +41,11 @@ async function main(args) {
 
     await app.start()
 
-    for (var init of inits) {
+    for (const init of inits) {
         if (init.delay) {
             await new Promise(resolve => setTimeout(resolve, init.delay))
         }
-        app.log('Executing', init)
+        logger.log('Executing', init)
         await app.setMetricValue(init.deviceName, init.metricName, init.value, init.labels)
     }
 }
