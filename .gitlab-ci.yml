@@ -12,5 +12,5 @@ test:
   before_script:
     - apk --no-cache add make g++ gcc python3 linux-headers udev
   script:
-    - npm install
+    - npm ci
     - npm test
