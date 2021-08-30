@@ -8,8 +8,11 @@ echo "Running multiarch/qemu-user-static:register"
 docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 echo "Executing docker build"
+
+echo "DOCKERFILE_PATH=$DOCKERFILE_PATH"
+echo "IMAGE_NAME=$IMAGE_NAME"
+
 docker build \
-    -f "$DOCKERFILE_PATH" \
     -t "$IMAGE_NAME" \
     --build-arg "NPM_TOKEN=$NPM_TOKEN" \
     .
