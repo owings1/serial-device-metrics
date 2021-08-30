@@ -1,2 +1,20 @@
 #!/bin/bash
-docker build --build-arg NPM_TOKEN=$NPM_TOKEN -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+
+# Using the build hook seems to ignore the other hooks, so
+# we invoke them manually.
+
+if [[ -x hooks/post_checkout ]]; then
+    echo "Manually executing post_checkout hook..."
+    ./hooks/post_checkout
+fi
+if [[ -x hooks/pre_build ]]; then
+    echo "Manually executing pre_build hook..."
+    ./hooks/pre_build
+fi
+
+docker build --build-arg "NPM_TOKEN=$NPM_TOKEN" -f "$DOCKERFILE_PATH" -t "$IMAGE_NAME" .
+
+if [[ -x hooks/post_build ]]; then
+    echo "Manually executing post_build hook..."
+    ./hooks_post_build
+fi
