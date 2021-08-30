@@ -1,5 +1,5 @@
 {
-  "name": "owings1/serial-device-metrics",
+  "name": "local.serial-device-metrics",
   "private": true,
   "version": "0.0.1",
   "description": "read and publish prometheus metrics from serial devices",
