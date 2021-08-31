@@ -1,14 +1,20 @@
 {
-  "name": "local.serial-device-metrics",
+  "name": "serial-device-metrics",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "read and publish prometheus metrics from serial devices",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "nyc --reporter=text-summary mocha test/specs/** && nyc report --reporter=lcov"
+    "test": "nyc --reporter=text-summary mocha test/specs/** && nyc report --reporter=lcov",
+    "clean": "npm run cl && rm -rf node_modules",
+    "cl": "rm -rf .nyc_output coverage",
+    "co": "open coverage/lcov-report/index.html",
+    "preversion": "npm run clean && npm i && npm t",
+    "version": "echo no version script to run",
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
