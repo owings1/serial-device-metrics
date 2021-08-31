@@ -1,2 +1,0 @@
-#!/bin/bash
-ARCH=amd64 "$(dirname $0)/../../build"

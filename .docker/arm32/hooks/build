@@ -1,2 +1,0 @@
-#!/bin/bash
-ARCH=arm32 "$(dirname $0)/../../build"

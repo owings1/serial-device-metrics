@@ -7,7 +7,9 @@ if [[ -z "$IMAGE_NAME" ]]; then
     exit 1
 fi
 
-if [[ -z "$ARCH" ]]; then
+if [[ "$IMAGE_NAME" = *"-arm32" ]]; then
+    ARCH="arm32"
+else
     ARCH="amd64"
 fi
 
@@ -23,7 +25,7 @@ fi
 echo "Building ARCH=$ARCH"
 
 BASEDIR="$(cd `dirname $0`/.. && pwd)"
-DOCKERFILE="$BASEDIR/Dockerfile"
+DOCKERFILE="$BASEDIR/.docker/Dockerfile"
 TMPDIR="$BASEDIR/tmp"
 
 if [[ "$ARCH" = arm32 ]]; then
