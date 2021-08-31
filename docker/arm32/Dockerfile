@@ -11,13 +11,7 @@ ENV CONFIG_FILE="/etc/serial-device-metrics/config.yaml"
 
 RUN apk add --no-cache make g++ gcc python3 linux-headers udev
 
-ARG NPM_TOKEN
-COPY docker/npmrc .npmrc
-
-COPY package.json .
-COPY package-lock.json .
-
-RUN npm install --omit dev
+RUN --mount=type=secret,id=npmrc,dst=.npmrc npm install --omit dev
 
 COPY --chown=node:node . .
 
