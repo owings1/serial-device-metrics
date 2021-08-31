@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+
+if [[ -z "$IMAGE_NAME" ]]; then
+    echo "IMAGE_NAME not set" >&2
+    exit 1
+fi
+
+if [[ -z "$ARCH" ]]; then
+    ARCH="amd64"
+fi
+
+if [[ "$ARCH" = amd64 ]]; then
+    PARENT="node:alpine"
+elif [[ "$ARCH" = arm32 ]]; then
+    PARENT="owings1/arm32v7-qemu-node:alpine"
+else
+    echo "Unknown ARCH: $ARCH" >&2
+    exit 1
+fi
+
+echo "Building ARCH=$ARCH"
+
+BASEDIR="$(cd `dirname $0`/.. && pwd)"
+DOCKERFILE="$BASEDIR/Dockerfile"
+TMPDIR="$BASEDIR/tmp"
+
+if [[ "$ARCH" = arm32 ]]; then
+    echo "Running multiarch/qemu-user-static:register"
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+fi
+
+echo "Preparing npmrc secret"
+mkdir -p "$TMPDIR"
+NPMRC="$TMPDIR/npmrc"
+echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$NPMRC"
+
+echo "Executing docker build"
+set +e
+DOCKER_BUILDKIT=1 docker build \
+    -f "$DOCKERFILE" \
+    -t "$IMAGE_NAME" \
+    --build-arg "PARENT=$PARENT" \
+    --secret id=npmrc,src="$NPMRC" \
+    "$BASEDIR"
+
+CODE="$?"
+
+rm -f "$NPMRC"
+
+if [[ "$CODE" != 0 ]]; then
+    echo "Docker failed with exit code $CODE" >&2
+fi
+
+exit "$CODE"

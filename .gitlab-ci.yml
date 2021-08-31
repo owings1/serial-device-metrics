@@ -1,12 +1,11 @@
-image: node:alpine
-
 stages:
   - test
 
-test:
+npm_test:
   stage: test
   tags:
     - docker
+  image: node:alpine
   variables:
     FORCE_COLOR: "2"
   before_script:
@@ -14,3 +13,13 @@ test:
   script:
     - npm ci
     - npm test
+
+build_docker:
+  stage: test
+  tags:
+    - shell
+  variables:
+    IMAGE_NAME: "ci:${CI_JOB_ID}"
+  script:
+    - ./.docker/amd64/hooks/build
+    - docker rmi "$IMAGE_NAME"

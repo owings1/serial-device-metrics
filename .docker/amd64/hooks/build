@@ -1,13 +1,2 @@
 #!/bin/bash
-echo "Building for amd64"
-
-echo "Preparing npmrc secret"
-mkdir -p tmp && echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > tmp/npmrc
-
-echo "Executing docker build"
-docker build \
-    -t "$IMAGE_NAME" \
-    --secret id=npmrc,src=tmp/npmrc \
-    .
-
-rm -f tmp/npmrc
+ARCH=amd64 "$(dirname $0)/../../build"
