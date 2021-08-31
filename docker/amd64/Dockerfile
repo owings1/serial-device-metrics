@@ -10,7 +10,7 @@ ENV CONFIG_FILE="/etc/serial-device-metrics/config.yaml"
 RUN apk add --no-cache make g++ gcc python3 linux-headers udev
 
 ARG NPM_TOKEN
-COPY .npmrc .npmrc
+COPY docker/npmrc .npmrc
 
 COPY package.json .
 COPY package-lock.json .
