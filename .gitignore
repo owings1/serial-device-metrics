@@ -1,8 +1,7 @@
-node_modules
-/coverage
 .nyc_output
-/tmp
+/coverage
 /dist
 /local
-/config.*
 /qemu-arm-static
+/tmp
+node_modules
